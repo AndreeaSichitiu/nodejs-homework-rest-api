@@ -1,23 +1,54 @@
-const User = require("./schemas/contactSchema.js");
+const Contact = require("./schemas/contactSchema.js");
+const User = require("./schemas/usersSchema.js");
 
 const getAllContacts = async () => {
-  return User.find();
+  return Contact.find();
 };
 const getContactById = async (id) => {
-  return User.findById(id);
+  return Contact.findById(id);
 };
-const createContact = async ({name, email, phone, favorite}) => {
-  return User.create({name, email, phone, favorite});
+const createContact = async ({ name, email, phone, favorite }) => {
+  return Contact.create({ name, email, phone, favorite });
 };
 const deleteContact = async (id) => {
-  return User.findByIdAndDelete(id);
+  return Contact.findByIdAndDelete(id);
 };
 const updateContact = async (id, data) => {
-  return User.findByIdAndUpdate(id, data, { new: true });
+  return Contact.findByIdAndUpdate(id, data, { new: true });
 };
 const updateContactStatus = async (id, data) => {
-  return User.findByIdAndUpdate(id, data, { new: true });
+  return Contact.findByIdAndUpdate(id, data, { new: true });
 };
+
+const createUser = async ({ email, password }) => {
+  const userExistent = await User.findOne({ email });
+
+  if (userExistent) {
+    throw new Error("Email already in use!");
+  }
+
+  const newUser = new User({ email, password });
+  newUser.setPassword(password);
+  return await newUser.save();
+};
+
+const loginUser = async ({ email, password, token }) => {
+  const user = await User.findOne({ email });
+
+  if (!user || !user.validPassword(password)) {
+    throw new Error("Wrong email or password");
+  }
+
+  user.setToken(token);
+  await user.save();
+  return user;
+};
+
+const findUser = async (user) => {
+  const result = await User.findOne({ email: user.email });
+  return result;
+};
+
 module.exports = {
   getAllContacts,
   getContactById,
@@ -25,4 +56,7 @@ module.exports = {
   deleteContact,
   updateContact,
   updateContactStatus,
+  createUser,
+  loginUser,
+  findUser,
 };
