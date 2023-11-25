@@ -1,6 +1,9 @@
 const moongose = require("mongoose");
 const bCrypt = require("bcryptjs");
 const Schema = moongose.Schema;
+const gravatar = require("gravatar");
+
+
 const userSchema = new Schema({
   password: {
     type: String,
@@ -20,6 +23,7 @@ const userSchema = new Schema({
     type: String,
     default: null,
   },
+  avatarURL: {type: String,},
 });
 
 userSchema.methods.setPassword = function (password) {
@@ -32,5 +36,21 @@ userSchema.methods.validPassword = function (password) {
 userSchema.methods.setToken = function (token) {
   this.token = token;
 };
+
+userSchema.pre("save", function (next) {
+  if (!this.avatarURL) {
+    this.avatarURL = gravatar.url(
+      this.email,
+      {
+        s: 200,
+        r: "pg",
+        d: "identicon",
+      },
+      true
+    );
+  }
+  next();
+});
+
 const User = moongose.model("users", userSchema);
 module.exports = User;
