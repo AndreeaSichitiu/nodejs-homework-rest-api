@@ -2,10 +2,11 @@ const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
 const path = require("path");
+const sgMail = require("@sendgrid/mail");
 
-const contactsRouter = require("./routes/api/contacts.js");
-
-require("./middlewares/passportConfig.js");
+const contactsRouter = require("./src/routes/api/contacts");
+ 
+require("./src/middlewares/passportConfig");
 
 const dotenv = require("dotenv");
 dotenv.config();
@@ -21,6 +22,8 @@ app.use(express.json());
 app.use("/api", contactsRouter);
 
 app.use(express.static(path.join(__dirname, "public")));
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Page not found" });

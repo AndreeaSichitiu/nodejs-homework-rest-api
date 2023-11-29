@@ -1,5 +1,7 @@
 const Contact = require("./schemas/contactSchema.js");
 const User = require("./schemas/usersSchema.js");
+const sgMail = require("@sendgrid/mail");
+ 
 
 const getAllContacts = async () => {
   return Contact.find();
@@ -27,7 +29,23 @@ const createUser = async ({ email, password }) => {
     throw new Error("Email already in use!");
   }
 
-  const newUser = new User({ email, password });
+  const codUnicDeVerificare = String(Date.now());
+
+  const msg = {
+    to: email,
+    from: "andra28marin@yahoo.com",
+    subject: "Email de verificare cont!",
+    text: `Codul de verificare este ${codUnicDeVerificare} / http://localhost:3000/api/users/verify/${codUnicDeVerificare}`,
+  };
+
+  sgMail
+    .send(msg)
+    .then(() => console.log("Email trimis"))
+    .catch(() => {
+      throw new Error("Eroare la trimitere");
+    });
+  
+  const newUser = new User({ email, password, verificationToken: codUnicDeVerificare,});
   newUser.setPassword(password);
   return await newUser.save();
 };
@@ -49,6 +67,21 @@ const findUser = async (user) => {
   return result;
 };
 
+const verifyEmail = async (verificationToken) => {
+  const update = { verify: true, verificationToken: null };
+
+  const result = await User.findOneAndUpdate(
+    {
+      verificationToken,
+    },
+    { $set: update },
+    { new: true }
+  );
+  console.log(result);
+  if (!result) throw new Error("userul nu exista");
+};
+
+
 module.exports = {
   getAllContacts,
   getContactById,
@@ -59,4 +92,5 @@ module.exports = {
   createUser,
   loginUser,
   findUser,
+  verifyEmail,
 };
