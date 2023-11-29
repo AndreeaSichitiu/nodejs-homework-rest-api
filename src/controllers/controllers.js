@@ -319,7 +319,7 @@ const verifyEmailController = async (req, res, next) => {
     console.log(verificationToken);
     await verifyEmail(verificationToken);
 
-    res.status(200).json({ mesaj: "Email verificat cu success", code: 200 });
+    res.status(200).json({ mesaj: "Email verified with succes", code: 200 });
   } catch (error) {
     res.status(404).json({
       status: "error",

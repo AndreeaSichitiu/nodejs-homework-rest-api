@@ -78,7 +78,7 @@ const verifyEmail = async (verificationToken) => {
     { new: true }
   );
   console.log(result);
-  if (!result) throw new Error("userul nu exista");
+  if (!result) throw new Error("User not found!");
 };
 
 
